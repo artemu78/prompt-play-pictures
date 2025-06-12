@@ -1,0 +1,153 @@
+
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Slider } from '@/components/ui/slider';
+import { Play, Sparkles } from 'lucide-react';
+import { generateVideo } from '../services/videoService';
+
+interface VideoGenerationFormProps {
+  onGenerationStart: () => void;
+  onVideoGenerated: (url: string) => void;
+  onError: (error: string) => void;
+}
+
+const VideoGenerationForm: React.FC<VideoGenerationFormProps> = ({
+  onGenerationStart,
+  onVideoGenerated,
+  onError,
+}) => {
+  const [prompt, setPrompt] = useState('');
+  const [apiKey, setApiKey] = useState('');
+  const [generateAudio, setGenerateAudio] = useState(false);
+  const [duration, setDuration] = useState([5]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!prompt.trim()) {
+      onError('Please enter a prompt');
+      return;
+    }
+    
+    if (!apiKey.trim()) {
+      onError('Please enter your fal.ai API key');
+      return;
+    }
+
+    setIsSubmitting(true);
+    onGenerationStart();
+
+    try {
+      const videoUrl = await generateVideo({
+        prompt: prompt.trim(),
+        apiKey: apiKey.trim(),
+        generateAudio,
+        duration: duration[0],
+      });
+      
+      onVideoGenerated(videoUrl);
+    } catch (error) {
+      onError(error instanceof Error ? error.message : 'Failed to generate video');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Card className="w-full max-w-2xl mx-auto shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+      <CardHeader className="text-center pb-6">
+        <CardTitle className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
+          <Sparkles className="w-6 h-6 text-purple-600" />
+          Create Your Video
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="prompt" className="text-sm font-medium">
+              Video Prompt *
+            </Label>
+            <Textarea
+              id="prompt"
+              placeholder="Describe the video you want to create... (e.g., 'A serene sunset over a calm ocean with gentle waves')"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              className="min-h-[100px] resize-none border-2 focus:border-purple-500 transition-colors"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="apiKey" className="text-sm font-medium">
+              fal.ai API Key *
+            </Label>
+            <Input
+              id="apiKey"
+              type="password"
+              placeholder="Enter your fal.ai API key"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              className="border-2 focus:border-purple-500 transition-colors"
+              required
+            />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="generateAudio"
+              checked={generateAudio}
+              onCheckedChange={(checked) => setGenerateAudio(checked as boolean)}
+            />
+            <Label htmlFor="generateAudio" className="text-sm font-medium cursor-pointer">
+              Generate audio
+            </Label>
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">
+              Duration: {duration[0]} seconds
+            </Label>
+            <Slider
+              value={duration}
+              onValueChange={setDuration}
+              max={8}
+              min={1}
+              step={1}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>1s</span>
+              <span>8s</span>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-3 transition-all duration-200 transform hover:scale-[1.02]"
+          >
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Generating...
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Play className="w-4 h-4" />
+                Generate Video
+              </div>
+            )}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default VideoGenerationForm;
