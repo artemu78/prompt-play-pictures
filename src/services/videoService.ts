@@ -20,7 +20,7 @@ export const generateVideo = async (params: GenerateVideoParams): Promise<string
       },
       body: JSON.stringify({
         prompt,
-        duration,
+        duration: `${duration}s`,
         generate_audio: generateAudio,
       }),
     });
