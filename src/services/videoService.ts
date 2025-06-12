@@ -15,7 +15,7 @@ export const generateVideo = async (params: GenerateVideoParams): Promise<string
     const response = await fetch('https://fal.run/fal-ai/veo3', {
       method: 'POST',
       headers: {
-        'Authorization': `Key ${apiKey}`,
+        'Authorization': apiKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
