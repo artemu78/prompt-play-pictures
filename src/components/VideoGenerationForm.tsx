@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Play, Sparkles, Info } from 'lucide-react';
+import { Play, Sparkles, Info, ExternalLink } from 'lucide-react';
 import { generateVideo } from '../services/videoService';
 
 interface VideoGenerationFormProps {
@@ -87,7 +87,19 @@ const VideoGenerationForm: React.FC<VideoGenerationFormProps> = ({
                     </div>
                     <div>
                       <strong>2. 🔑 Paste your Fal.ai API key</strong>
-                      <p className="text-muted-foreground">Buy it at Fal.ai → Login → Billing → API Key</p>
+                      <p className="text-muted-foreground">
+                        Buy it at{' '}
+                        <a 
+                          href="https://fal.ai" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline inline-flex items-center gap-1"
+                        >
+                          Fal.ai
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                        {' '}→ Login → Billing → API Key
+                      </p>
                     </div>
                     <div>
                       <strong>3. ⏱️ Set the duration</strong>
