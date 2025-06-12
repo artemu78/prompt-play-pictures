@@ -9,7 +9,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
-  if (window.location.hostname === "lovable.app") {
+  if (window.location.hostname === "prompt-play-pictures.lovable.app") {
     window.location.replace("https://veo3videogenerator.netlify.app/");
     return null; // Return null to prevent rendering anything while redirecting
   }
