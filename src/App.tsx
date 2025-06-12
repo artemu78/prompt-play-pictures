@@ -8,10 +8,16 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
+const App = () => {
+  if (window.location.hostname === "lovable.app") {
+    window.location.replace("https://veo3videogenerator.netlify.app/");
+    return null; // Return null to prevent rendering anything while redirecting
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
       <Sonner />
       <BrowserRouter>
         <Routes>
@@ -22,6 +28,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
