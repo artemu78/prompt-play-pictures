@@ -7,21 +7,31 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Play, Sparkles, Info, ExternalLink } from 'lucide-react';
 import { generateVideo } from '../services/videoService';
+import type { Model, ModelId } from "@/types";
+import { ChevronDown } from 'lucide-react';
 
+const models: Model[] = [
+  { id: 'fal-ai/veo3', name: 'Veo3', price: 1, isAudio: true, range: [3, 8] },
+  { id: 'fal-ai/veo3/fast', name: 'Veo3 Fast', price: 0.5, isAudio: true, range: [3, 8] },
+  {id: 'fal-ai/bytedance/seedance/v1/pro/text-to-video', name: 'Seedance v1', price: 1, isAudio: false, range: [3, 12] }
+];
 interface VideoGenerationFormProps {
   onGenerationStart: () => void;
   onVideoGenerated: (url: string) => void;
   onError: (error: string) => void;
+  setModelName: (name: string) => void;
 }
 
 const VideoGenerationForm: React.FC<VideoGenerationFormProps> = ({
   onGenerationStart,
   onVideoGenerated,
   onError,
-}) => {
+  setModelName}) => {
+  const [model, setModel] = useState<Model>();
   const [prompt, setPrompt] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [generateAudio, setGenerateAudio] = useState(false);
@@ -50,6 +60,7 @@ const VideoGenerationForm: React.FC<VideoGenerationFormProps> = ({
         apiKey: apiKey.trim(),
         generateAudio,
         duration: duration[0],
+        modelId: model?.id
       });
       
       onVideoGenerated(videoUrl);
@@ -58,6 +69,16 @@ const VideoGenerationForm: React.FC<VideoGenerationFormProps> = ({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleModelChange = (modelId: ModelId) => {
+    const model = models.find((model) => model.id === modelId);
+    setModel(model);
+    setGenerateAudio(model?.isAudio || false);
+    setModelName(model?.name || '');
+    const durationNormalized = (model?.range[1] < duration[0]) ? model?.range[1] : duration[0];
+    setDuration([durationNormalized]);
+    
   };
 
   return (
@@ -158,11 +179,38 @@ const VideoGenerationForm: React.FC<VideoGenerationFormProps> = ({
             />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="apiKey" className="text-sm font-medium">
+              Model *
+            </Label>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  {model?.name || 'Select Model'}
+                  <ChevronDown className="w-4 h-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Select Model</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {models.map((model) => (
+                  <DropdownMenuItem
+                    key={model.id}
+                    onSelect={() => handleModelChange(model.id)}
+                  >
+                    {model.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           <div className="flex items-center space-x-2">
             <Checkbox
               id="generateAudio"
               checked={generateAudio}
               onCheckedChange={(checked) => setGenerateAudio(checked as boolean)}
+              disabled={!model?.isAudio}
             />
             <Label htmlFor="generateAudio" className="text-sm font-medium cursor-pointer">
               Generate audio
@@ -176,14 +224,14 @@ const VideoGenerationForm: React.FC<VideoGenerationFormProps> = ({
             <Slider
               value={duration}
               onValueChange={setDuration}
-              max={8}
-              min={1}
+              min={model?.range[0] || 1}
+              max={model?.range[1] || 8}
               step={1}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>1s</span>
-              <span>8s</span>
+              <span>{model?.range[0] || 1}s</span>
+              <span>{model?.range[1] || 8}s</span>
             </div>
           </div>
 

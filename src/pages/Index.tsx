@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import VideoGenerationForm from '../components/VideoGenerationForm';
-import VideoPlayer from '../components/VideoPlayer';
-import LoadingAnimation from '../components/LoadingAnimation';
-import UserMenu from '../components/UserMenu';
+import VideoGenerationForm from '@/components/VideoGenerationForm';
+import VideoPlayer from '@/components/VideoPlayer';
+import LoadingAnimation from '@/components/LoadingAnimation';
+import UserMenu from '@/components/UserMenu';
 import { useAuth } from '@/hooks/useAuth';
 import { LogIn } from 'lucide-react';
 
@@ -14,6 +14,7 @@ const Index = () => {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { user, loading } = useAuth();
+  const [modelName, setModelName] = useState<string>('');
 
   const handleVideoGenerated = (url: string) => {
     setVideoUrl(url);
@@ -53,7 +54,7 @@ const Index = () => {
           <div className="flex-1" />
           <div className="text-center">
             <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
-              VEO3 Video Generator
+              {modelName} Video Generator
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Transform your ideas into stunning videos using fal.ai's advanced VEO3 model
@@ -80,6 +81,7 @@ const Index = () => {
                 onGenerationStart={handleGenerationStart}
                 onVideoGenerated={handleVideoGenerated}
                 onError={handleError}
+                setModelName={setModelName}
               />
               {error && (
                 <div className="mt-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">

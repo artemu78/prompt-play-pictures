@@ -1,18 +1,18 @@
-
+import type { ModelId } from "@/types";
 interface GenerateVideoParams {
   prompt: string;
   apiKey: string;
   generateAudio: boolean;
   duration: number;
+  modelId: ModelId;
 }
 
-export const generateVideo = async (params: GenerateVideoParams): Promise<string> => {
-  const { prompt, apiKey, generateAudio, duration } = params;
-  
+export const generateVideo = async ({ prompt, apiKey, generateAudio, duration, modelId }: GenerateVideoParams): Promise<string> => {
+
   try {
     console.log('Starting video generation with params:', { prompt, generateAudio, duration });
-    
-    const response = await fetch('https://fal.run/fal-ai/veo3', {
+
+    const response = await fetch(`https://fal.run/${modelId}`, {
       method: 'POST',
       headers: {
         'Authorization': `Key ${apiKey}`,
@@ -28,7 +28,7 @@ export const generateVideo = async (params: GenerateVideoParams): Promise<string
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('API error response:', errorData);
-      
+
       if (response.status === 401) {
         throw new Error('Invalid API key. Please check your fal.ai API key.');
       } else if (response.status === 400) {
@@ -50,7 +50,7 @@ export const generateVideo = async (params: GenerateVideoParams): Promise<string
     return result.video.url;
   } catch (error) {
     console.error('Video generation error:', error);
-    
+
     if (error instanceof Error) {
       throw error;
     } else {
